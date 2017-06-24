@@ -1,4 +1,5 @@
 ﻿#if UNSAFE
+#if !UNITY_5
 
 using System;
 using System.IO;
@@ -158,4 +159,5 @@ namespace CapnProto
         }
     }
 }
+#endif
 #endif

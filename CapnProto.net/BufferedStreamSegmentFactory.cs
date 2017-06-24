@@ -9,7 +9,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace CapnProto
 {
@@ -125,7 +124,14 @@ namespace CapnProto
                     int read = (int)Math.Min(bytes, buffer.Length);
                     if (!Read(source, buffer, read)) throw new EndOfStreamException();
                     Marshal.Copy(buffer, 0, writeHead, read);
+#if !UNITY_5
                     writeHead += read;
+#else
+                    unsafe
+                    {
+                        writeHead = (IntPtr)((byte*)writeHead + read);
+                    }
+#endif
                     bytes -= read;
                 }
                 ((PointerSegment)segment).Initialize(ptr, totalWords, activeWords);
@@ -137,7 +143,7 @@ namespace CapnProto
                 if (ptr != default(IntPtr)) Marshal.FreeHGlobal(ptr);
             }
 #else
-            byte[] buffer = new byte[totalWords << 3];
+                    byte[] buffer = new byte[totalWords << 3];
             if (!Read(source, buffer, buffer.Length))
             {
                 return false;

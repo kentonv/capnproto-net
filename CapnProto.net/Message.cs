@@ -297,6 +297,8 @@ namespace CapnProto
                 FinishedWithWriteBuffer(buffer);
             }
         }
+
+#if !UNITY_5
         public async void WriteAsync(Stream destination)
         {
             if (destination == null) throw new ArgumentNullException("destination");
@@ -326,6 +328,7 @@ namespace CapnProto
                 FinishedWithWriteBuffer(buffer);
             }
         }
+#endif
 
         private
 #if UNSAFE

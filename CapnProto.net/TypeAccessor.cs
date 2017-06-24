@@ -449,7 +449,7 @@ namespace CapnProto
             public DynamicStructTypeAccessor(ElementSize elementSize, short dataWords, short pointers)
                 : base(elementSize, dataWords, pointers)
             { }
-#if FULLCLR
+#if FULLCLR && !UNITY_5
             public override T GetElement(Pointer pointer, int index)
             {
                 return (T)(dynamic)pointer.GetListStruct(index);

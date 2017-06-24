@@ -984,7 +984,7 @@ namespace CapnProto
             Outdent();
             if (node.@struct.fields.IsValid())
             {
-                foreach (var field in node.@struct.fields.OrderBy(x => x.codeOrder).ThenBy(x => x.name, Text.Comparer))
+                foreach (var field in node.@struct.fields) //.OrderBy(x => x.codeOrder).ThenBy(x => x.name, Text.Comparer))
                 {
                     if (field.discriminantValue == Field.noDiscriminant)
                     {

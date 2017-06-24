@@ -19,9 +19,39 @@ namespace CapnProto
             this.destination = destination;
             this.@namespace = @namespace;
             this.serializer = serializer;
+            ulong fileNodeId = 0;
+            ulong nsNodeId = 0;
             foreach (var node in nodes)
             {
                 if (node.id != 0) map[node.id] = node;
+                if (fileNodeId == 0 && node.Union == Node.Unions.file)
+                {
+                    fileNodeId = node.id;
+                }
+                if (nsNodeId == 0 && node.Union == Node.Unions.annotation && node.annotation.targetsFile && node.annotation.type.Union == Schema.Type.Unions.text)
+                {
+                    string name = node.displayName.ToString();
+                    string anno = name.Substring((int)node.displayNamePrefixLength);
+                    if (name.Contains("csharp") && anno == "namespace")
+                    {
+                        nsNodeId = node.id;
+                    }
+                }
+            }
+            if (nsNodeId != 0 && fileNodeId != 0)
+            {
+                Node fileNode = map[fileNodeId];
+                foreach (var anno in fileNode.annotations)
+                {
+                    if (anno.id == nsNodeId)
+                    {
+                        string ns = anno.value.text.ToString();
+                        if (ns.Length > 0)
+                        {
+                            this.@namespace = ns;
+                        }
+                    }
+                }
             }
         }
         protected Schema.Node FindParent(Schema.Node node)
@@ -304,7 +334,7 @@ namespace CapnProto
                         break;
                     case Schema.Node.Unions.annotation:
                     default:
-                        WriteLine().WriteComment(string.Format("Not implemented: {0} ({1}))", node.displayName, node.Union));
+                        WriteLine().WriteComment(string.Format("Not implemented: {0} ({1}))", node.displayName, node.Union));                        
                         break;
                 }
             }
@@ -333,7 +363,7 @@ namespace CapnProto
 
             if (fields.IsValid())
             {
-                foreach (var field in fields.OrderBy(x => x.codeOrder).ThenBy(x => x.name, Text.Comparer))
+                foreach (var field in fields) //.OrderBy(x => x.codeOrder).ThenBy(x => x.name, Text.Comparer))
                 {
                     bool pushed = false;
                     if (field.discriminantValue != Field.noDiscriminant)

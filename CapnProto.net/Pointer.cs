@@ -16,8 +16,9 @@ namespace CapnProto
             }
         }
         Pointer IPointer.Pointer { get { return this; } }
-
+#if !UNITY_5
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         static int Combine(int hash1, int hash2)
         {
             unchecked
@@ -42,7 +43,9 @@ namespace CapnProto
         public static bool operator <(Pointer x, Pointer y) { return (Compare(x, y) & MSB32) != 0; }
         public static bool operator >(Pointer x, Pointer y) { return Compare(x, y) > 0; }
 
+#if !UNITY_5
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         static bool AreEqual(Pointer x, Pointer y)
         {
             if (x.startAndType == y.startAndType && x.dataWordsAndPointers == y.dataWordsAndPointers && x.aux == y.aux)
@@ -57,7 +60,9 @@ namespace CapnProto
         }
 
 
+#if !UNITY_5
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         static int Compare(Pointer x, Pointer y)
         {
             unchecked
