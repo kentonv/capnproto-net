@@ -396,6 +396,9 @@ namespace CapnProto.Schema
         {
             writer.BeginFile().BeginNamespace(writer.Namespace);
 
+            ulong fileId = this.requestedFiles[0].id;
+            var inFile = new HashSet<ulong>();
+
             var nested = new HashSet<ulong>();
             foreach (var node in this.nodes)
             {
@@ -404,7 +407,16 @@ namespace CapnProto.Schema
                 if (children.IsValid())
                 {
                     foreach (var child in children)
-                        if (child.id != 0) nested.Add(child.id);
+                    {
+                        if (child.id != 0)
+                        {
+                            nested.Add(child.id);
+                            if (node.id == fileId)
+                            {
+                                inFile.Add(child.id);
+                            }
+                        }
+                    }
                 }
             }
             foreach (var node in this.nodes) //.OrderBy(x => writer.LocalName(x.displayName, false)))
