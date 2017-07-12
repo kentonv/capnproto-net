@@ -403,6 +403,10 @@ namespace CapnProto.Schema
             foreach (var node in this.nodes)
             {
                 if (node.Union == Node.Unions.file) continue;
+                if (node.scopeId == fileId)
+                {
+                    inFile.Add(node.id);
+                }
                 var children = node.nestedNodes;
                 if (children.IsValid())
                 {
@@ -411,10 +415,6 @@ namespace CapnProto.Schema
                         if (child.id != 0)
                         {
                             nested.Add(child.id);
-                            if (node.id == fileId)
-                            {
-                                inFile.Add(child.id);
-                            }
                         }
                     }
                 }
@@ -423,7 +423,7 @@ namespace CapnProto.Schema
             {
                 if (node.Union == Node.Unions.file) continue;
                 var union = new Stack<UnionStub>();
-                if (node.id != 0 && !nested.Contains(node.id))
+                if (node.id != 0 && !nested.Contains(node.id) && inFile.Contains(node.id))
                 {
                     writer.WriteNode(node, union);
                 }

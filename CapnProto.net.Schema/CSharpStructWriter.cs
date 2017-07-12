@@ -982,20 +982,46 @@ namespace CapnProto
             Indent();
             WriteLine().Write("this.").Write(PointerName).Write(" = pointer;");
             Outdent();
+            HashSet<ulong> nestedDone = null;
             if (node.@struct.fields.IsValid())
             {
                 foreach (var field in node.@struct.fields) //.OrderBy(x => x.codeOrder).ThenBy(x => x.name, Text.Comparer))
                 {
-                    if (field.discriminantValue == Field.noDiscriminant)
+                    bool pushed = false;
+                    if (field.discriminantValue != Field.noDiscriminant)
                     {
-                        WriteFieldAccessor(node, field, union);
-                    }
-                    else
-                    {
+                        // write with union-based restructions
                         union.Push(new UnionStub(node.@struct.discriminantOffset, field.discriminantValue));
-                        WriteFieldAccessor(node, field, union);
-                        union.Pop();
+                        pushed = true;
                     }
+
+                    WriteFieldAccessor(node, field, union);
+
+                    // declare the struct too, if we need to - noting that it includes union-context
+                    Node child = default(Node);
+                    switch (field.Union)
+                    {
+                        case Field.Unions.group:
+                            child = Lookup(field.group.typeId);
+                            break;
+                        case Field.Unions.slot:
+                            if (field.slot.type.Union == Schema.Type.Unions.@struct)
+                                child = Lookup(field.slot.type.@struct.typeId);
+                            break;
+                    }
+                    if (child.IsValid())
+                    {
+                        if (child.IsGroup())
+                        {
+                            if (nestedDone == null) nestedDone = new HashSet<ulong>();
+                            if (nestedDone.Add(child.id))
+                            {
+                                WriteGroup(child, union);
+                            }
+                        }
+                    }
+
+                    if (pushed) union.Pop();
                 }
             }
             if (node.@struct.discriminantCount != 0)

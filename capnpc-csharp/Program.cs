@@ -18,7 +18,7 @@ namespace CapnProto.Schema
                     if (!msg.ReadNext()) throw new InvalidOperationException("Message on stdin not detected");
                     var req = (CodeGeneratorRequest)msg.Root;
 
-                    var codeWriter = new CSharpStructWriter(destination, req.nodes, "Capnp");
+                    var codeWriter = new CSharpStructWriter(destination, req.nodes, "Generated");
                     req.GenerateCustomModel(codeWriter);
                     return 0;
                 }

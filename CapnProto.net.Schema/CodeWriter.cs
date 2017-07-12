@@ -48,7 +48,7 @@ namespace CapnProto
                         string ns = anno.value.text.ToString();
                         if (ns.Length > 0)
                         {
-                            this.@namespace = ns;
+                            //this.@namespace = ns;
                         }
                     }
                 }
