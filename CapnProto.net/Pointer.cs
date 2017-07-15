@@ -1066,25 +1066,30 @@ namespace CapnProto
                 else if (targetSegment == segment || targetSegment.Index == segment.Index)
                 {
                     bool isEmpty;
+                    int delta;
                     switch (startAndType & 7)
                     {
                         case Type.StructBasic:
                             rhs = dataWordsAndPointers;
                             isEmpty = rhs == 0;
-                            goto LocationBasedHeader;
+                            // intra-segment pointer
+                            delta = isEmpty ? 0 : (((int)(startAndType >> 3) - targetHeaderIndex) - 1);
+                            lhs = (startAndType & 3) | (uint)(delta << 2);
+                            break;
                         case Type.ListBasic:
                             isEmpty = (aux >> 3) == 0;
                             rhs = aux;
-                            goto LocationBasedHeader;
+                            // intra-segment pointer
+                            delta = isEmpty ? 0 : (((int)(startAndType >> 3) - targetHeaderIndex) - 1);
+                            lhs = (startAndType & 3) | (uint)(delta << 2);
+                            break;
                         case Type.ListComposite:
                             isEmpty = false; // always a tag word
                             int itemCount = (int)(aux >> 3);
                             int itemSize = (int)((dataWordsAndPointers & 0xFFFF) + (uint)(dataWordsAndPointers >> 32));
                             rhs = (uint)((itemSize * itemCount) << 3) | (aux & 7);
-                            goto LocationBasedHeader;
-                        LocationBasedHeader:
                             // intra-segment pointer
-                            int delta = isEmpty ? 0 : (((int)(startAndType >> 3) - targetHeaderIndex) - 1);
+                            delta = isEmpty ? 0 : (((int)(startAndType >> 3) - targetHeaderIndex) - 1);
                             lhs = (startAndType & 3) | (uint)(delta << 2);
                             break;
                         case Type.StructFragment:
