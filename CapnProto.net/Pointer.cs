@@ -1086,7 +1086,7 @@ namespace CapnProto
                         case Type.ListComposite:
                             isEmpty = false; // always a tag word
                             int itemCount = (int)(aux >> 3);
-                            int itemSize = (int)((dataWordsAndPointers & 0xFFFF) + (uint)(dataWordsAndPointers >> 32));
+                            int itemSize = (int)((dataWordsAndPointers & 0xFFFF) + (uint)(dataWordsAndPointers >> 16));
                             rhs = (uint)((itemSize * itemCount) << 3) | (aux & 7);
                             // intra-segment pointer
                             delta = isEmpty ? 0 : (((int)(startAndType >> 3) - targetHeaderIndex) - 1);
