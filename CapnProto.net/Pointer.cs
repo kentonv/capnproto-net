@@ -16,8 +16,9 @@ namespace CapnProto
             }
         }
         Pointer IPointer.Pointer { get { return this; } }
-
+#if !UNITY_5
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         static int Combine(int hash1, int hash2)
         {
             unchecked
@@ -42,7 +43,9 @@ namespace CapnProto
         public static bool operator <(Pointer x, Pointer y) { return (Compare(x, y) & MSB32) != 0; }
         public static bool operator >(Pointer x, Pointer y) { return Compare(x, y) > 0; }
 
+#if !UNITY_5
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         static bool AreEqual(Pointer x, Pointer y)
         {
             if (x.startAndType == y.startAndType && x.dataWordsAndPointers == y.dataWordsAndPointers && x.aux == y.aux)
@@ -57,7 +60,9 @@ namespace CapnProto
         }
 
 
+#if !UNITY_5
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         static int Compare(Pointer x, Pointer y)
         {
             unchecked
@@ -1061,25 +1066,30 @@ namespace CapnProto
                 else if (targetSegment == segment || targetSegment.Index == segment.Index)
                 {
                     bool isEmpty;
+                    int delta;
                     switch (startAndType & 7)
                     {
                         case Type.StructBasic:
                             rhs = dataWordsAndPointers;
                             isEmpty = rhs == 0;
-                            goto LocationBasedHeader;
+                            // intra-segment pointer
+                            delta = isEmpty ? 0 : (((int)(startAndType >> 3) - targetHeaderIndex) - 1);
+                            lhs = (startAndType & 3) | (uint)(delta << 2);
+                            break;
                         case Type.ListBasic:
                             isEmpty = (aux >> 3) == 0;
                             rhs = aux;
-                            goto LocationBasedHeader;
+                            // intra-segment pointer
+                            delta = isEmpty ? 0 : (((int)(startAndType >> 3) - targetHeaderIndex) - 1);
+                            lhs = (startAndType & 3) | (uint)(delta << 2);
+                            break;
                         case Type.ListComposite:
                             isEmpty = false; // always a tag word
                             int itemCount = (int)(aux >> 3);
-                            int itemSize = (int)((dataWordsAndPointers & 0xFFFF) + (uint)(dataWordsAndPointers >> 32));
+                            int itemSize = (int)((dataWordsAndPointers & 0xFFFF) + (uint)(dataWordsAndPointers >> 16));
                             rhs = (uint)((itemSize * itemCount) << 3) | (aux & 7);
-                            goto LocationBasedHeader;
-                        LocationBasedHeader:
                             // intra-segment pointer
-                            int delta = isEmpty ? 0 : (((int)(startAndType >> 3) - targetHeaderIndex) - 1);
+                            delta = isEmpty ? 0 : (((int)(startAndType >> 3) - targetHeaderIndex) - 1);
                             lhs = (startAndType & 3) | (uint)(delta << 2);
                             break;
                         case Type.StructFragment:

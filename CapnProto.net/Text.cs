@@ -129,7 +129,7 @@ namespace CapnProto
             return (Text)ptr;
 
         }
-#if FULLCLR
+#if FULLCLR && !UNITY_5
         public static Text Create(Pointer pointer, System.Data.IDataRecord reader, int fieldIndex)
         {
             if (reader == null) throw new ArgumentNullException("reader");

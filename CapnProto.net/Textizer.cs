@@ -176,7 +176,7 @@ namespace CapnProto
             
         }
 
-#if FULLCLR
+#if FULLCLR && !UNITY_5
         internal static Text Create(Pointer pointer, System.Data.IDataRecord reader, int fieldIndex)
         {
             // TODO: replace with GetChars work

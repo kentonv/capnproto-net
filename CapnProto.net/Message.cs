@@ -297,6 +297,8 @@ namespace CapnProto
                 FinishedWithWriteBuffer(buffer);
             }
         }
+
+#if !UNITY_5
         public async void WriteAsync(Stream destination)
         {
             if (destination == null) throw new ArgumentNullException("destination");
@@ -326,6 +328,7 @@ namespace CapnProto
                 FinishedWithWriteBuffer(buffer);
             }
         }
+#endif
 
         private
 #if UNSAFE
@@ -350,14 +353,19 @@ namespace CapnProto
             }
 #else
             BufferSegment.WriteNibble(buffer, 0, (uint)(count - 1));
+            outputIndex++;
             int offset = 4;
             for (int i = 0; i < count; i++)
             {
                 BufferSegment.WriteNibble(buffer, offset, (uint)this[i].Length);
                 offset += 4;
+                outputIndex++;
             }
             if ((count % 2) == 0) // need to add padding
+            {
                 BufferSegment.WriteNibble(buffer, offset, 0);
+                outputIndex++;
+            }
 #endif
             return outputIndex << 2;
         }

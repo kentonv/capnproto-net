@@ -396,22 +396,34 @@ namespace CapnProto.Schema
         {
             writer.BeginFile().BeginNamespace(writer.Namespace);
 
+            ulong fileId = this.requestedFiles[0].id;
+            var inFile = new HashSet<ulong>();
+
             var nested = new HashSet<ulong>();
             foreach (var node in this.nodes)
             {
                 if (node.Union == Node.Unions.file) continue;
+                if (node.scopeId == fileId)
+                {
+                    inFile.Add(node.id);
+                }
                 var children = node.nestedNodes;
                 if (children.IsValid())
                 {
                     foreach (var child in children)
-                        if (child.id != 0) nested.Add(child.id);
+                    {
+                        if (child.id != 0)
+                        {
+                            nested.Add(child.id);
+                        }
+                    }
                 }
             }
             foreach (var node in this.nodes) //.OrderBy(x => writer.LocalName(x.displayName, false)))
             {
                 if (node.Union == Node.Unions.file) continue;
                 var union = new Stack<UnionStub>();
-                if (node.id != 0 && !nested.Contains(node.id))
+                if (node.id != 0 && !nested.Contains(node.id) && inFile.Contains(node.id))
                 {
                     writer.WriteNode(node, union);
                 }
